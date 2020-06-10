@@ -1,5 +1,6 @@
 const path = require('path')
-const app = require('express')()
+const express = require('express')
+const app = express()
 const server = require('http').createServer(app)
 const io = require('socket.io')(server)
 
@@ -7,30 +8,31 @@ let connections = []
 
 io.on('connection', client => {
   console.log(`${client.conn.id} connected`)
-
-  connections.forEach(connection => {
-    connection.emit('connection', client.conn.id)
-  })
-
+  client.emit('client-list', connections.map(c => c.conn.id))
   connections.push(client)
 
   client.on('disconnect', e => {
     console.log(`${client.conn.id} disconnected`)
     connections = connections.filter(c => c.conn.id !== client.conn.id)
-  })
-
-  client.on('candidate', candidate => {
-    // client has sent us its candidate
     connections.forEach(connection => {
-      connection.emit('candidate', candidate)
+      connection.emit('disconnection', client.conn.id)
     })
   })
 
-  client.on('description', ({ description, peer }) => {
-    // client has sent us a description and peer it wants to connect to
+  client.on('signal', ({ peerId, data }) => {
+    console.log('signal received from client...')
+    const peer = connections.filter(c => c.conn.id == peerId)[0]
+    if (peer) {
+      console.log(`peer.conn.id: ${JSON.stringify(peer.conn.id, null, 2)}`)
+      console.log(`client.conn.id: ${JSON.stringify(client.conn.id, null, 2)}`)
+      peer.emit('signal-receive', { peerId: client.conn.id, data })
+    } else {
+      console.log('peer %s does not exist', peer)
+    }
   })
 });
 
+app.use(express.static('client'))
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../client/index.html'))
 });
