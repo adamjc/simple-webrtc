@@ -1,0 +1,33 @@
+<html>
+  <head>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const socket = io()
+
+      const configuration = {
+        iceServers: [{
+          urls: 'stun:stun.l.google.com:19302'
+        }]
+      }
+
+      let peerConnections = []
+
+      socket.on('connection', peerId => {
+        // a new connection has been made to a server, so prepare a PeerConnection and get ready to send an offer
+      })
+
+      socket.on('candidate', candidate => {
+        // client has a new peer to connect to
+        const pc = new RTCPeerConnection(configuration)
+        peerConnections.push(pc)
+      })
+
+      function connect () {
+        
+      }
+    </script>
+  </head>
+  <body>
+    <h1>Hello, world!</h1>
+  </body>
+</html>
