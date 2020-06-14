@@ -4,12 +4,16 @@ const app = express()
 const server = require('http').createServer(app)
 const io = require('socket.io')(server)
 
+// connections is an array of Socket defined by Socket.IO
 let connections = []
 
 io.on('connection', client => {
   console.log(`${client.conn.id} connected`)
   client.emit('client-list', connections.map(c => c.conn.id))
   connections.push(client)
+  connections.forEach(connection => {
+    connection.emit('')
+  })
 
   client.on('disconnect', e => {
     console.log(`${client.conn.id} disconnected`)

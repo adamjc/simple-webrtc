@@ -1,11 +1,18 @@
 <html>
   <head>
+    
+    <link rel="stylesheet" href="client.css">
+  </head>
+  <body>
+    <div id="messages"></div>
+
+    <div id="input">
+      <input id="input__text" type="text" disabled />
+      <button id="input__send" disabled >Send</button>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/simple-peer/9.7.2/simplepeer.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="./client.js"></script>
-    </script>
-  </head>
-  <body>
-    <h1>Hello, world!</h1>
   </body>
 </html>

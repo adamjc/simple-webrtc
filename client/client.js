@@ -12,18 +12,15 @@ socket.on('client-list', peerIds => {
     const peer = new SimplePeer({ initiator: true, trickle: false })
 
     peer.on('signal', data => {
-      console.log('signalling as offerer...')
-      console.log(`data: ${JSON.stringify(data, null, 2)}`)
-      console.log(`peerId: ${JSON.stringify(peerId, null, 2)}`)
       socket.emit('signal', { peerId, data })
     })
 
     peer.on('connect', () => {
-      console.log('connected')
-      peer.send('What uuup, initiating true')
+      const input = document.getElementById('input__text').removeAttribute('disabled')
+      const button = document.getElementById('input__send').removeAttribute('disabled')
     })
 
-    peer.on('data', data => console.log(data.toString()))
+    peer.on('data', addMessage)
 
     return { peerId, peer }
   })
@@ -33,30 +30,42 @@ socket.on('client-list', peerIds => {
 
 // A peer wants to give us its signalling data (description & ice candidatey stuff I guess)
 socket.on('signal-receive', ({ peerId, data }) => {
-  console.log('signal-receive')
-  console.log(`peerId: ${JSON.stringify(peerId, null, 2)}`)
-  console.log(`data: ${JSON.stringify(data, null, 2)}`)
+  console.log('signal-receive', peerId, data)
   let pc = peerConnections.filter(pc => pc.peerId === peerId)[0]
   
   if (!pc) {
-    console.log('peer connection not found')
     const peer = new SimplePeer({ initiator: false, trickle: false })
     peer.signal(data)
     peer.on('signal', data => {
-      console.log('signalling as answerer...')
       socket.emit('signal', { peerId, data })
     })
 
     peer.on('connect', () => {
-      console.log('connected')
-      peer.send('What uuup, initiating false')
+      document.getElementById('input__text').removeAttribute('disabled')
+      document.getElementById('input__send').removeAttribute('disabled')
     })
 
-    peer.on('data', data => console.log(data.toString()))
+    peer.on('data', addMessage)
 
     peerConnections.push({ peerId, peer })
   } else {
     console.log('peer connection found')
     pc.peer.signal(data)
   }
+})
+
+function addMessage (msg) {
+  const messages = document.getElementById('messages')
+  const message = document.createElement('div')
+  message.innerHTML = msg
+  messages.appendChild(message)
+}
+
+const button = document.getElementById('input__send')
+button.addEventListener('click', e => {
+  const message = document.getElementById('input__text').value
+  peerConnections.forEach(({ peer }) => {
+    peer.send(message)
+  })
+  addMessage(message)
 })
